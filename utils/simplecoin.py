@@ -12,7 +12,7 @@ from fake_useragent import UserAgent
 from faker import Faker
 
 from data import config
-from utils.core import logger
+from utils.core import logger, BalanceResult
 
 
 class SimpleCoin:
@@ -37,17 +37,20 @@ class SimpleCoin:
     async def logout(self) -> None:
         await self.session.close()
 
-    async def balance(self) -> tuple[float, int, int]:
+    async def balance(self) -> BalanceResult:
         """когда seconds будет равно max_farming_seconds - надо клеймить"""
         resp = await self.session.post("https://api.thesimpletap.app/api/v1/public/telegram/profile/",
                                        json=await self._get_json_data())
         resp_json = await resp.json()
         await asyncio.sleep(1)
 
-        active_farming_balance = resp_json.get('activeFarmingBalance')
-        active_farming_seconds = resp_json.get('activeFarmingSeconds')
-        max_farming_seconds = resp_json.get('maxFarmingSecondSec')
-        return active_farming_balance, active_farming_seconds, max_farming_seconds
+        return BalanceResult(
+            active_farming_balance=resp_json.get('activeFarmingBalance'),
+            active_farming_seconds=resp_json.get('activeFarmingSeconds'),
+            max_farming_seconds=resp_json.get('maxFarmingSecondSec'),
+            available_taps=resp_json.get('availableTaps'),  # буду тапать когда available taps меньше чем max
+            max_available_taps=resp_json.get('maxAvailableTaps')
+        )
 
     async def claim(self) -> dict:
         resp = await self.session.post("https://api.thesimpletap.app/api/v1/public/telegram/claim/",
