@@ -9,3 +9,4 @@ class BalanceResult:
     available_taps: int
     max_available_taps: int
     tap_size: int
+    spin_count: int

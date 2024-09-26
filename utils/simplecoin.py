@@ -50,7 +50,8 @@ class SimpleCoin:
             max_farming_seconds=resp_json.get('maxFarmingSecondSec'),
             available_taps=resp_json.get('availableTaps'),  # буду тапать когда available taps меньше чем max
             max_available_taps=resp_json.get('maxAvailableTaps'),
-            tap_size=resp_json.get('tapSize')
+            tap_size=resp_json.get('tapSize'),
+            spin_count=resp_json.get('spinCount') # fortune
         )
 
     async def claim(self) -> dict:
