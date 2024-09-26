@@ -22,7 +22,8 @@ async def main():
             workdir=config.WORKDIR
         )
         simplecoin = SimpleCoin(tg_client=client)
-        await simplecoin.get_tg_web_data()
+        query = await simplecoin.get_tg_web_data()
+        print(query)
 
 
 if __name__ == "__main__":

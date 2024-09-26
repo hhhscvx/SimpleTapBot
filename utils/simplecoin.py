@@ -37,7 +37,8 @@ class SimpleCoin:
     async def logout(self) -> None:
         await self.session.close()
 
-    async def balance(self) -> tuple[float, int]:
+    async def balance(self) -> tuple[float, int, int]:
+        """когда seconds будет равно max_farming_seconds - надо клеймить"""
         resp = await self.session.post("https://api.thesimpletap.app/api/v1/public/telegram/profile/",
                                        json=await self._get_json_data())
         resp_json = await resp.json()
@@ -45,14 +46,18 @@ class SimpleCoin:
 
         active_farming_balance = resp_json.get('activeFarmingBalance')
         active_farming_seconds = resp_json.get('activeFarmingSeconds')
-        return active_farming_balance, active_farming_seconds
+        max_farming_seconds = resp_json.get('maxFarmingSecondSec')
+        return active_farming_balance, active_farming_seconds, max_farming_seconds
 
     async def claim(self) -> dict:
         resp = await self.session.post("https://api.thesimpletap.app/api/v1/public/telegram/claim/",
                                        json=await self._get_json_data())
-        resp_json = await resp.json()
+        return await resp.json()
 
-        return resp_json()
+    async def start(self) -> dict:
+        resp = await self.session.post("https://api.thesimpletap.app/api/v1/public/telegram/activate/",
+                                       json=await self._get_json_data())
+        return await resp.json()
 
     async def _get_json_data(self) -> dict[str, str | int]:
         return {
