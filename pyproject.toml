@@ -13,6 +13,7 @@ aiohttp = "^3.10.6"
 aiohttp-socks = "^0.9.0"
 loguru = "^0.7.2"
 fake-useragent = "^1.5.1"
+Faker = "^30.0.0"
 
 [tool.poetry.dev-dependencies]
 

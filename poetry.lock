@@ -89,6 +89,17 @@ optional = false
 python-versions = "*"
 
 [[package]]
+name = "faker"
+version = "30.0.0"
+description = "Faker is a Python package that generates fake data for you."
+category = "main"
+optional = false
+python-versions = ">=3.8"
+
+[package.dependencies]
+python-dateutil = ">=2.4"
+
+[[package]]
 name = "frozenlist"
 version = "1.4.1"
 description = "A list-like structure which implements collections.abc.MutableSequence"
@@ -207,6 +218,17 @@ optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 
 [[package]]
+name = "python-dateutil"
+version = "2.9.0.post0"
+description = "Extensions to the standard Python datetime module"
+category = "main"
+optional = false
+python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,>=2.7"
+
+[package.dependencies]
+six = ">=1.5"
+
+[[package]]
 name = "python-dotenv"
 version = "1.0.1"
 description = "Read key-value pairs from a .env file and set them as environment variables"
@@ -230,6 +252,14 @@ anyio = ["anyio (>=3.3.4,<5.0.0)"]
 asyncio = ["async-timeout (>=3.0.1)"]
 curio = ["curio (>=1.4)"]
 trio = ["trio (>=0.16.0)"]
+
+[[package]]
+name = "six"
+version = "1.16.0"
+description = "Python 2 and 3 compatibility utilities"
+category = "main"
+optional = false
+python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*"
 
 [[package]]
 name = "tgcrypto"
@@ -273,7 +303,7 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.11"
-content-hash = "1b7246618eeeb274d076c297298934ae504f96402a5edca53a29fc4ad6117079"
+content-hash = "96a661519180badef9683f93ed8418b9e1715b7c5dceedb4fc0254a95e358721"
 
 [metadata.files]
 aiohappyeyeballs = []
@@ -284,6 +314,7 @@ annotated-types = []
 attrs = []
 colorama = []
 fake-useragent = []
+faker = []
 frozenlist = []
 idna = []
 loguru = []
@@ -294,8 +325,10 @@ pydantic-core = []
 pydantic-settings = []
 pyrogram = []
 pysocks = []
+python-dateutil = []
 python-dotenv = []
 python-socks = []
+six = []
 tgcrypto = []
 typing-extensions = []
 win32-setctime = []
