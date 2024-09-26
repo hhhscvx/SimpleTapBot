@@ -17,7 +17,10 @@ class Settings(BaseSettings):
 
     # timeout in seconds for checking accounts on valid
     TIMEOUT: int = 30
-    DELAY_CONN_ACCOUNT: list[int] = [5, 15]
+    DELAYS: dict[str, list[int]] = {
+        'ACCOUNTS': [5, 15],
+        'CLAIM': [600, 1800],
+    }
 
 
 config = Settings()

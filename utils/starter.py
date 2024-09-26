@@ -12,7 +12,7 @@ async def start(tg_client: Client, proxy: str | None = None):
     simplecoin = SimpleCoin(tg_client=tg_client, proxy=proxy)
     session_name = tg_client.name + '.session'
 
-    await sleep(uniform(*config.DELAY_CONN_ACCOUNT))
+    await sleep(uniform(*config.DELAYS['ACCOUNT']))
 
     while True:
         try:
