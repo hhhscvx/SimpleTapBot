@@ -8,3 +8,4 @@ class BalanceResult:
     max_farming_seconds: int
     available_taps: int
     max_available_taps: int
+    tap_size: int

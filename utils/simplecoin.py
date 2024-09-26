@@ -49,7 +49,8 @@ class SimpleCoin:
             active_farming_seconds=resp_json.get('activeFarmingSeconds'),
             max_farming_seconds=resp_json.get('maxFarmingSecondSec'),
             available_taps=resp_json.get('availableTaps'),  # буду тапать когда available taps меньше чем max
-            max_available_taps=resp_json.get('maxAvailableTaps')
+            max_available_taps=resp_json.get('maxAvailableTaps'),
+            tap_size=resp_json.get('tapSize')
         )
 
     async def claim(self) -> dict:
@@ -61,6 +62,14 @@ class SimpleCoin:
         resp = await self.session.post("https://api.thesimpletap.app/api/v1/public/telegram/activate/",
                                        json=await self._get_json_data())
         return await resp.json()
+
+    async def tap(self, taps_count: int) -> dict:
+        """странно там чет работает, максимум 10-12 тапов в запросе, сделаю randint(5, 13) * tap_size"""
+        json_data = await self._get_json_data()
+        json_data['count'] = taps_count
+        resp = await self.session.post("https://api.thesimpletap.app/api/v1/public/telegram/activate/",
+                                       json=json_data)
+        return await resp.json()  # result, message: OK
 
     async def _get_json_data(self) -> dict[str, str | int]:
         return {
