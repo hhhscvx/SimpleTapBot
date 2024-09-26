@@ -1,13 +1,13 @@
 import asyncio
 from random import choices, randint, uniform
 import string
-from urllib.parse import unquote
+from urllib.parse import quote, unquote
 
 import aiohttp
 from aiohttp_socks import ProxyConnector
 from pyrogram import Client
-from pyrogram.raw.functions.messages import RequestAppWebView
-from pyrogram.raw.types import InputBotAppShortName
+from pyrogram.raw.functions.messages import RequestWebView
+from pyrogram.raw.types import WebViewResultUrl
 from fake_useragent import UserAgent
 from faker import Faker
 
@@ -37,11 +37,37 @@ class SimpleCoin:
     async def logout(self) -> None:
         await self.session.close()
 
-    async def login(self) -> bool:
-        await asyncio.sleep(randint(config.DELAY_CONN_ACCOUNT))
-        query = await self.get_tg_web_data()
+    async def balance(self) -> tuple[float, int]:
+        resp = await self.session.post("https://api.thesimpletap.app/api/v1/public/telegram/profile/",
+                                       json=await self._get_json_data())
+        resp_json = await resp.json()
+        await asyncio.sleep(1)
 
-    async def get_tg_web_data(self):
+        active_farming_balance = resp_json.get('activeFarmingBalance')
+        active_farming_seconds = resp_json.get('activeFarmingSeconds')
+        return active_farming_balance, active_farming_seconds
+
+    async def claim(self) -> dict:
+        resp = await self.session.post("https://api.thesimpletap.app/api/v1/public/telegram/claim/",
+                                       json=await self._get_json_data())
+        resp_json = await resp.json()
+
+        return resp_json()
+
+    async def _get_json_data(self) -> dict[str, str | int]:
+        return {
+            'authData': await self.get_tg_web_data(),
+            'userId': await self.get_user_tg_id()
+        }
+
+    async def get_user_tg_id(self) -> int:
+        await self.tg_client.connect()
+        user_tg_id = (await self.tg_client.get_me()).id
+        print(f'user_tg_id: {user_tg_id} | Type: {type(user_tg_id)}')
+        await self.tg_client.disconnect()
+        return user_tg_id
+
+    async def get_tg_web_data(self) -> str | None:
         try:
             await self.tg_client.connect()
 
@@ -54,18 +80,26 @@ class SimpleCoin:
                         break
                 await asyncio.sleep(5)
 
-            web_view = await self.tg_client.invoke(RequestAppWebView(
+            await self.tg_client.send_message('Simple_Tap_Bot', '/start')
+            await asyncio.sleep(uniform(1.5, 2))
+
+            web_view: WebViewResultUrl = await self.tg_client.invoke(RequestWebView(
                 peer=await self.tg_client.resolve_peer('Simple_Tap_Bot'),
-                app=InputBotAppShortName(bot_id=await self.tg_client.resolve_peer('Simple_Tap_Bot'), short_name="app"),
+                bot=await self.tg_client.resolve_peer('Simple_Tap_Bot'),
                 platform='android',
-                write_allowed=True
+                from_bot_menu=False,
+                url="https://simpletap.app/"
             ))
-            tg_id = (await self.tg_client.get_me()).id
             await self.tg_client.disconnect()
             auth_url = web_view.url
 
             query = unquote(string=unquote(string=auth_url.split('tgWebAppData=')[1].split('&tgWebAppVersion')[0]))
-            return query
+            query_id = query.split('query_id=')[1].split('&user=')[0]
+            user = quote(query.split("&user=")[1].split('&auth_date=')[0])
+            auth_date = query.split('&auth_date=')[1].split('&hash=')[0]
+            hash_ = query.split('&hash=')[1]
+
+            return f"query_id={query_id}&user={user}&auth_date={auth_date}&hash={hash_}"
 
         except Exception as err:
             raise err
