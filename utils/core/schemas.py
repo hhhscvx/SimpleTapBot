@@ -2,7 +2,8 @@ from dataclasses import dataclass
 
 
 @dataclass(frozen=True, slots=True)
-class BalanceResult:
+class ProfileResult:
+    balance: float
     active_farming_balance: float
     active_farming_seconds: int
     max_farming_seconds: int

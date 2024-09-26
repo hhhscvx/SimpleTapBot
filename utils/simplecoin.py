@@ -12,7 +12,7 @@ from fake_useragent import UserAgent
 from faker import Faker
 
 from data import config
-from utils.core import logger, BalanceResult
+from utils.core import logger, ProfileResult
 
 
 class SimpleCoin:
@@ -21,6 +21,7 @@ class SimpleCoin:
         self.session_name = tg_client.name
         self.proxy = f"{config.PROXY_TYPE_REQUESTS}://{proxy}" if proxy else None
         connector = ProxyConnector.from_url(url=self.proxy) if proxy else aiohttp.TCPConnector(verify_ssl=False)
+        self.msg_was_send = False
 
         if proxy:
             proxy = {
@@ -37,21 +38,22 @@ class SimpleCoin:
     async def logout(self) -> None:
         await self.session.close()
 
-    async def balance(self) -> BalanceResult:
-        """когда seconds будет равно max_farming_seconds - надо клеймить"""
+    async def profile(self) -> ProfileResult:
         resp = await self.session.post("https://api.thesimpletap.app/api/v1/public/telegram/profile/",
                                        json=await self._get_json_data())
         resp_json = await resp.json()
         await asyncio.sleep(1)
+        data = resp_json.get('data')
 
-        return BalanceResult(
-            active_farming_balance=resp_json.get('activeFarmingBalance'),
-            active_farming_seconds=resp_json.get('activeFarmingSeconds'),
-            max_farming_seconds=resp_json.get('maxFarmingSecondSec'),
-            available_taps=resp_json.get('availableTaps'),  # буду тапать когда available taps меньше чем max
-            max_available_taps=resp_json.get('maxAvailableTaps'),
-            tap_size=resp_json.get('tapSize'),
-            spin_count=resp_json.get('spinCount') # fortune
+        return ProfileResult(
+            balance=data.get('balance'),
+            active_farming_balance=data.get('activeFarmingBalance'),
+            active_farming_seconds=data.get('activeFarmingSeconds'),
+            max_farming_seconds=data.get('maxFarmingSecondSec'),
+            available_taps=data.get('availableTaps'),  # буду тапать когда available taps меньше чем max
+            max_available_taps=data.get('maxAvailableTaps'),
+            tap_size=data.get('tapSize'),
+            spin_count=data.get('spinCount')  # fortune
         )
 
     async def claim(self) -> dict:
@@ -65,10 +67,9 @@ class SimpleCoin:
         return await resp.json()
 
     async def tap(self, taps_count: int) -> dict:
-        """странно там чет работает, максимум 10-12 тапов в запросе, сделаю randint(5, 13) * tap_size"""
         json_data = await self._get_json_data()
         json_data['count'] = taps_count
-        resp = await self.session.post("https://api.thesimpletap.app/api/v1/public/telegram/activate/",
+        resp = await self.session.post("https://api.thesimpletap.app/api/v1/public/telegram/tap/",
                                        json=json_data)
         return await resp.json()  # result, message: OK
 
@@ -81,7 +82,6 @@ class SimpleCoin:
     async def get_user_tg_id(self) -> int:
         await self.tg_client.connect()
         user_tg_id = (await self.tg_client.get_me()).id
-        print(f'user_tg_id: {user_tg_id} | Type: {type(user_tg_id)}')
         await self.tg_client.disconnect()
         return user_tg_id
 
@@ -98,7 +98,9 @@ class SimpleCoin:
                         break
                 await asyncio.sleep(5)
 
-            await self.tg_client.send_message('Simple_Tap_Bot', '/start')
+            if self.msg_was_send is False:
+                await self.tg_client.send_message('Simple_Tap_Bot', '/start')
+                self.msg_was_send = True
             await asyncio.sleep(uniform(1.5, 2))
 
             web_view: WebViewResultUrl = await self.tg_client.invoke(RequestWebView(

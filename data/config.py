@@ -7,7 +7,10 @@ class Settings(BaseSettings):
     API_ID: int
     API_HASH: str
 
-    TAPS_COUNT: list[int] = [3, 13]
+    RANDOM_TAPS_COUNT: list[int] = [3, 13]
+    SLEEP_BETWEEN_TAP: list[float] = [0.8, 3.0]
+    MIN_AVAILABLE_TAPS: int = 10
+    SLEEP_BY_MIN_ENERGY: list[int] = [600, 1800]
 
     USE_PROXY_FROM_FILE: bool = False  # True - if use proxy from file, False - if use proxy from accounts.json
     PROXY_PATH: str = "data/proxy.txt"
@@ -19,10 +22,8 @@ class Settings(BaseSettings):
 
     # timeout in seconds for checking accounts on valid
     TIMEOUT: int = 30
-    DELAYS: dict[str, list[int]] = {
-        'ACCOUNTS': [5, 15],
-        'CLAIM': [600, 1800],
-    }
+
+    DELAY_CONN_ACCOUNT: list[int] = [5, 15]
 
 
 config = Settings()

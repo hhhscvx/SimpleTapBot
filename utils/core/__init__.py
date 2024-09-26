@@ -4,9 +4,9 @@ __all__ = (
     "load_from_json",
     "save_accounts_to_file",
     "save_to_json",
-    "BalanceResult",
+    "ProfileResult",
 )
 
 from .logger import logger
 from .file_manager import get_all_lines, load_from_json, save_accounts_to_file, save_to_json
-from .schemas import BalanceResult
+from .schemas import ProfileResult
