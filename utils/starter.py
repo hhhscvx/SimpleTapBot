@@ -41,8 +41,10 @@ async def start(tg_client: Client, proxy: str | None = None):
                 for task in tasks:
                     await simplecoin.start_task(task_id=task['id'], task_type=task['type'])
                     await sleep(1)
-                    if await simplecoin.check_task(task_id=task['id'], task_type=task['type']) == 200:
-                        logger.success(f"{session_name} | Check task {task['title'] if task['title'].strip() != '' else f"№{task['id']}"}")
+                    task_id = task['id']
+                    if await simplecoin.check_task(task_id=task_id, task_type=task['type']) == 200:
+                        logger.success(
+                            f"{session_name} | Check task {task['title'] if task['title'].strip() != '' else f'№{task_id}'}")
                     await sleep(uniform(2, 3))
                 tasks_completed = True
 
@@ -51,7 +53,7 @@ async def start(tg_client: Client, proxy: str | None = None):
             available_taps = profile.available_taps
             while True:
                 if available_taps > config.MIN_AVAILABLE_TAPS:
-                    taps_count = randint(*config.RANDOM_TAPS_COUNT)
+                    taps_count = randint(*config.RANDOM_TAPS_COUNT) * profile.tap_size
                     tap = await simplecoin.tap(taps_count=taps_count)
                     if tap['result'] == "OK":
                         logger.success(f"{session_name} | Tapped +{taps_count} SMPL!")
