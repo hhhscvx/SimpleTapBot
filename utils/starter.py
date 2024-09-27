@@ -15,11 +15,13 @@ async def start(tg_client: Client, proxy: str | None = None):
 
     await sleep(uniform(*config.DELAY_CONN_ACCOUNT))
 
+    tasks_completed = False
+
     while True:
         try:
             # Claim | Farm
             profile = await simplecoin.profile()
-            logger.success(f"{session_name} | Signed in | Balance: {profile.balance} SMPL")  # TODO: balance None
+            logger.success(f"{session_name} | Signed in | Balance: {profile.balance} SMPL")
             await sleep(1)
             if profile.active_farming_seconds == profile.max_farming_seconds:
                 claim = await simplecoin.claim()
@@ -29,6 +31,20 @@ async def start(tg_client: Client, proxy: str | None = None):
                     start_farming = await simplecoin.start()
                     if start_farming['result'] == "OK":
                         logger.success(f"{session_name} | Start farming!")
+            else:
+                logger.info(
+                    f"{session_name} | Already farming ({profile.active_farming_seconds}/{profile.max_farming_seconds}s)")
+
+            # Tasks
+            if tasks_completed is False and config.DO_TASKS is True:
+                tasks = await simplecoin.get_tasks()
+                for task in tasks:
+                    await simplecoin.start_task(task_id=task['id'], task_type=task['type'])
+                    await sleep(1)
+                    if await simplecoin.check_task(task_id=task['id'], task_type=task['type']) == 200:
+                        logger.success(f"{session_name} | Check task {task['title'] if task['title'].strip() != '' else f"№{task['id']}"}")
+                    await sleep(uniform(2, 3))
+                tasks_completed = True
 
             # Taps
             profile = await simplecoin.profile()
@@ -37,7 +53,6 @@ async def start(tg_client: Client, proxy: str | None = None):
                 if available_taps > config.MIN_AVAILABLE_TAPS:
                     taps_count = randint(*config.RANDOM_TAPS_COUNT)
                     tap = await simplecoin.tap(taps_count=taps_count)
-                    print(tap)
                     if tap['result'] == "OK":
                         logger.success(f"{session_name} | Tapped +{taps_count} SMPL!")
                         available_taps -= taps_count

@@ -73,6 +73,32 @@ class SimpleCoin:
                                        json=json_data)
         return await resp.json()  # result, message: OK
 
+    async def get_tasks(self) -> list[dict]:
+        json_data = await self._get_json_data()
+        json_data['lang'] = "en"
+        json_data['platform'] = 1
+        resp = await self.session.post("https://api.thesimpletap.app/api/v1/public/telegram/get-task-list-2/",
+                                       json=json_data)
+        resp_json = await resp.json()
+        return resp_json['data']['social']
+
+    async def start_task(self, task_id: int, task_type: int) -> int:
+        """Там никакой проверки нет и всегда возвращается 200, так что просто каждой таске отправлять start и check"""
+        json_data = await self._get_json_data()
+        json_data['id'] = task_id
+        json_data['type'] = task_type
+        resp = await self.session.post("https://api.thesimpletap.app/api/v1/public/telegram/start-task-start-2/",
+                                       json=json_data)
+        return resp.status
+
+    async def check_task(self, task_id: int, task_type: int) -> int:
+        json_data = await self._get_json_data()
+        json_data['id'] = task_id
+        json_data['type'] = task_type
+        resp = await self.session.post("https://api.thesimpletap.app/api/v1/public/telegram/start-task-start-2/",
+                                       json=json_data)
+        return resp.status
+
     async def _get_json_data(self) -> dict[str, str | int]:
         return {
             'authData': await self.get_tg_web_data(),
