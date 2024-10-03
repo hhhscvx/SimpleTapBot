@@ -8,7 +8,7 @@ class Settings(BaseSettings):
     API_HASH: str
 
     RANDOM_TAPS_COUNT: list[int] = [3, 13]
-    SLEEP_BETWEEN_TAP: list[float] = [0.8, 3.0]
+    SLEEP_BETWEEN_TAP: list[float] = [0.6, 2.0]
     MIN_AVAILABLE_TAPS: int = 10
     SLEEP_BY_MIN_ENERGY: list[int] = [600, 1800]
 
